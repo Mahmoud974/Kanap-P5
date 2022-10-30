@@ -1,25 +1,30 @@
 "use strict";
 let data = [];
-let canapStorage;
-//Select the balises option and item__img
+let productStorage;
+/**
+ * Selectionner les balises option & item__img via le querySelector
+ */
 const option = document.querySelector("option"),
   item_img = document.querySelector(".item__img");
 
-//Get an object URL
+/**
+ * Récuperer l'URL, plus précisement l'id avec les variables suivantes
+ */
 let str = window.location.href,
   url = new URL(str),
   search_params = new URLSearchParams(url.search),
   productId = search_params.get("id");
+
 /**
- * Get Id of articles with API
+ * Obtenir les données de l'API
  */
-const getdata = async () => {
+const getData = async () => {
   await fetch(`http://localhost:3000/api/products/${productId}`)
     .then((data) => data.json())
     .then((res) => (data = res));
 };
 /**
- * Insert the API on the page product
+ * Décrire l'API avec le produit qui a été selectionner,
  */
 const setData = () => {
   document.title = `${data.name} | ${data.description}`;
@@ -28,7 +33,7 @@ const setData = () => {
   price.textContent = data.price.toLocaleString();
   description.textContent = data.description;
 
-  //Get an array of string any colors
+  //Parcourir le tableau de couleur
   for (let colors of data.colors) {
     let createColors = document.createElement("option");
     document.querySelector("#colors").appendChild(createColors);
@@ -37,34 +42,31 @@ const setData = () => {
   }
 };
 /**
- * Add a promise
+ * Ajouter une promesse
  */
-const getdatadetails = async () => {
-  await getdata();
+const getDataDetails = async () => {
+  await getData();
   setData();
 };
-getdatadetails();
-//Add the products with the button and redirect at the page cart.html
+getDataDetails();
+
+//Ajouter le produit selectionner dans le localStorage plus précisement dans le panier
 addToCart.addEventListener("click", () => {
-  /**
-   * Throw an alert if the condition don't full
-   */
+  //Afficher la boite de dialogue lorsque celui n'est pas remplie
   if (colors.value == "" || quantity.value == 0) {
     return alert("Veuillez choisir une couleur ou une quantité! ");
   } else if (quantity.value <= 100) {
-    /**
-     * Choose a quantity in the condition
-     */
+    //Choisir la quantité selon les conditions
     let optionsProduit = {
       _id: productId,
       colors: colors.value,
       quantity: Number(quantity.value),
     };
 
-    canapStorage = JSON.parse(localStorage.getItem("produit"));
+    productStorage = JSON.parse(localStorage.getItem("produit"));
 
-    if (canapStorage) {
-      const findProduct = canapStorage.find(
+    if (productStorage) {
+      const findProduct = productStorage.find(
         (el) => el._id === productId && el.colors === colors.value
       );
 
@@ -72,17 +74,20 @@ addToCart.addEventListener("click", () => {
         let newQuantite =
           parseInt(optionsProduit.quantity) + parseInt(findProduct.quantity);
         findProduct.quantity = newQuantite;
-        localStorage.setItem("produit", JSON.stringify(canapStorage));
+        localStorage.setItem("produit", JSON.stringify(productStorage));
       } else {
-        canapStorage.push(optionsProduit);
-        localStorage.setItem("produit", JSON.stringify(canapStorage));
+        productStorage.push(optionsProduit);
+        localStorage.setItem("produit", JSON.stringify(productStorage));
       }
-      //Empty the basket
     } else {
-      canapStorage = [];
-      canapStorage.push(optionsProduit);
-      localStorage.setItem("produit", JSON.stringify(canapStorage));
+      productStorage = [];
+      productStorage.push(optionsProduit);
+      localStorage.setItem("produit", JSON.stringify(productStorage));
     }
   }
-  alert(`Le produit ${data.name} a été rajouté au panier !`);
+  alert(
+    `Le produit ${data.name.toUpperCase()} de couleur ${colors.value.toUpperCase()} avec une quantité de ${Number(
+      quantity.value
+    )} a été rajouté au panier !`
+  );
 });

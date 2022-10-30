@@ -1,12 +1,12 @@
 "use strict";
 let idOrder = new URL(window.location.href).searchParams.get("orderId");
 /**
- * Display the orderId in the DOM
+ * Afficher le numero de la commande récuperer dans l'URL
  */
-const confirmChecked = () => {
+const confirmWithNumberFinal = () => {
   orderId.innerText = localStorage.getItem("orderId");
 
   localStorage.clear();
 };
 
-confirmChecked();
+confirmWithNumberFinal();

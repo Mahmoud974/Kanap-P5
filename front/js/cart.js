@@ -1,45 +1,39 @@
 "use strict";
-//Init the data and total in the variable
+//Initialiser les variables
 let data = [];
-let total = [];
-let quantityTotal = [];
 let getItemsInStorage;
-let getJSON;
+let getInJson;
+let productStorage = JSON.parse(localStorage.getItem("produit"));
 totalQuantity.innerHTML = 0;
 totalPrice.innerHTML = 0;
-//Get the storage of 'Produit'
-let productStorage = JSON.parse(localStorage.getItem("produit"));
 
 /**
- * Get an information via API with the param Id
- * @param {String} myId
+ * Obtenir les information du Id donnés sur l'API
+ * @param {String} myId l'identifiant de l'API
  */
 const getData = async (myId) => {
   await fetch(`http://localhost:3000/api/products/${myId}`)
     .then((res) => res.json())
     .then((res) => (data = res));
-
-  // .then(() => console.log(data));
 };
 
 /**
- * Make the products in the basket
+ * Afficher les produits dans le DOM depuis les donnés récuperer via le localstorage
  */
 const getProducts = async () => {
-  //Recover the localStorage his value
   getItemsInStorage = window.localStorage.getItem("produit");
-  //Put "Panier vide" if it's empty
+  //Afficher panier vide lorsque le localstorage est vide
   if (getItemsInStorage === null || getItemsInStorage.length == 2) {
     cart__items.innerHTML = "<p>Panier vide</p>";
   } else {
-    //Display the product to select
+    //Afficher le produit selectionnerr
     for (let i = 0; i < JSON.parse(getItemsInStorage).length; i++) {
-      getJSON = JSON.parse(getItemsInStorage)[i];
-      await getData(getJSON._id);
+      getInJson = JSON.parse(getItemsInStorage)[i];
+      await getData(getInJson._id);
 
       cart__items.innerHTML += ` <article class="cart__item" data-id="${
-        getJSON._id
-      }" data-color=${getJSON.colors}>
+        getInJson._id
+      }" data-color=${getInJson.colors}>
                 <div class="cart__item__img">
                   <img src=${String(
                     data.imageUrl
@@ -48,7 +42,7 @@ const getProducts = async () => {
                 <div class="cart__item__content">
                   <div class="cart__item__content__description">
                     <h2>${String(data.name)}</h2>
-                    <p>${getJSON.colors}</p>
+                    <p>${getInJson.colors}</p>
                     <p id='prixXQuantity'>${Number(data.price)} € </p> 
                   </div>
                   <div class="cart__item__content__settings">
@@ -72,18 +66,18 @@ const getProducts = async () => {
     }
 
     {
-      totalprice();
+      totalOfAmountTotal();
 
-      totalPrice.innerHTML = totalprice();
+      totalPrice.innerHTML = totalOfAmountTotal();
     }
   }
 };
 
 /**
- *
- * @returns Total of price
+ * Afficher le prix total
+ * @returns  Retourner le calcul faite par le nombre d'article x le prix
  */
-const totalprice = () => {
+const totalOfAmountTotal = () => {
   let totalprix = 0;
   for (let i = 0; i < JSON.parse(getItemsInStorage).length; i++) {
     totalprix = Number(totalOfItem()) * parseInt(data.price);
@@ -92,12 +86,10 @@ const totalprice = () => {
   }
 };
 /**
- * Delete an article
+ * Supprimer un article du DOM & du localstorage
  * @param {*} e
  */
 const deleteArticle = (e) => {
-  //TODO:A REVOIR imperativement
-
   if (confirm("Voulez-vous supprimer?")) {
     let index = e.getAttribute("index");
     productStorage.splice(index, 1);
@@ -106,14 +98,14 @@ const deleteArticle = (e) => {
     if (productStorage.length == []) {
       cart__items.innerHTML = "<p>Panier vide</p>";
       totalQuantity.innerHTML = totalOfItem();
-      totalPrice.innerHTML = totalprice();
-    } else {
+      totalPrice.innerHTML = totalOfAmountTotal();
+    } else if (productStorage.splice(index, 1)) {
       let article = document.querySelectorAll("article");
       for (let anArticle of article) {
         anArticle.addEventListener("click", (e) => {
           e.currentTarget.remove();
           totalQuantity.innerHTML = totalOfItem();
-          totalPrice.innerHTML = totalprice();
+          totalPrice.innerHTML = totalOfAmountTotal();
         });
       }
     }
@@ -122,7 +114,7 @@ const deleteArticle = (e) => {
 getProducts();
 
 /**
- *Modidy the quantities from input
+ *Modifier la quantité sur l'input et le mettre à jour dans le localstorage et le DOM
  * @param {*} testNumber
  * @returns
  */
@@ -136,11 +128,10 @@ const modifyQuantity = (e) => {
     localStorage.setItem("produit", JSON.stringify(productStorage));
     location.reload();
   } else {
-    // document.querySelector("#totalPrice").innerHTML = totalOfItem();
     localStorage.setItem("produit", JSON.stringify(productStorage));
   }
   totalQuantity.innerHTML = totalOfItem();
-  totalPrice.innerHTML = totalprice();
+  totalPrice.innerHTML = totalOfAmountTotal();
 };
 
 const totalOfItem = () => {
@@ -152,14 +143,19 @@ const totalOfItem = () => {
 };
 totalQuantity.innerHTML = totalOfItem();
 
-//Check of forms with regex
+//Vérifier le formulaires avec les REGEX
 const cart__order__form = document.querySelector("form");
 const inputs = document.querySelectorAll(
   ' input[type="text"], input[type="email"]'
 );
-//Init of variables
+
 let firstName, lastname, adress, city, mail;
-//Alert of mistakes
+/**
+ * Afficher un message d'alerte lorsque celui-ci n'est pas remplie
+ * @param {*} tag
+ * @param {*} message
+ * @param {*} valid
+ */
 const errorDisplay = (tag, message, valid) => {
   const selectId = document.querySelector(`#${tag}`);
 
@@ -170,7 +166,7 @@ const errorDisplay = (tag, message, valid) => {
   }
 };
 /**
- *Check the correspondance of FirstName
+ *Vérifier la correspondance du prénom
  * @param {String} value
  */
 const checkFirstName = (value) => {
@@ -192,7 +188,7 @@ const checkFirstName = (value) => {
   }
 };
 /**
- *Check the correspondance of lastName
+ *Vérifier la correspondance du nom
  * @param {String} value
  */
 const checkLastName = (value) => {
@@ -214,7 +210,7 @@ const checkLastName = (value) => {
   }
 };
 /**
- *Check the correspondance of adress
+ *Vérifier la correspondance de l'adresse
  * @param {String} value
  */
 const checkAdress = (value) => {
@@ -239,7 +235,7 @@ const checkAdress = (value) => {
 };
 
 /**
- *Check the correspondance of the city
+ *Vérifier la correspondance de la ville
  * @param {String} value
  */
 const checkCity = (value) => {
@@ -259,7 +255,7 @@ const checkCity = (value) => {
   }
 };
 /**
- *Check the correspondance of mail
+ *CVérifier la correspondance du mail
  * @param {String} value
  */
 const checkMail = (value) => {
@@ -276,7 +272,7 @@ const checkMail = (value) => {
   }
 };
 /**
- * Full the inputs correctly
+ * Faire remplir les inputs correctements
  */
 inputs.forEach((input) => {
   input.addEventListener("input", (e) => {
@@ -304,10 +300,8 @@ inputs.forEach((input) => {
 });
 
 /**
- * Send the form to confirmation.html
+ * Envoyer le formulaire dans la page confirmation, losquer celui remplie toute les conditions
  */
-
-// let inputAll = document.querySelectorAll("input");
 
 order.addEventListener("click", (e) => {
   const thisValue = {
@@ -318,7 +312,7 @@ order.addEventListener("click", (e) => {
     email: document.getElementById("email").value,
   };
   e.preventDefault();
-  //Get a condition if they're full
+
   if (
     getItemsInStorage === null ||
     getItemsInStorage.length == 2 ||
@@ -331,14 +325,11 @@ order.addEventListener("click", (e) => {
   ) {
     alert("Remplir les inputs ou les paniers corrrectement !");
   } else {
-    //Build localStorage of array
     let idProducts = [];
     for (let i = 0; i < productStorage.length; i++) {
       idProducts.push(productStorage[i]._id);
     }
-    /**
-     * Init on the object
-     */
+    //Initialiser l'objet
     const checkForm = {
       contact: {
         firstName: document.getElementById("firstName").value,
@@ -349,7 +340,7 @@ order.addEventListener("click", (e) => {
       },
       products: idProducts,
     };
-    //Post the form
+    //Poster le formulaire lorsque celui rermplie toute les conditons
     const options = {
       method: "POST",
       body: JSON.stringify(checkForm),
